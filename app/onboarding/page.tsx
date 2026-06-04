@@ -37,8 +37,20 @@ export default function Onboarding() {
   const update = (field: string, value: string | boolean) =>
     setForm((f) => ({ ...f, [field]: value }));
 
-  const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
-  const back = () => setStep((s) => Math.max(s - 1, 0));
+const next = async () => {
+  if (step === 3) {
+    try {
+      await fetch("/api/onboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  setStep((s) => Math.min(s + 1, STEPS.length - 1));
+};  const back = () => setStep((s) => Math.max(s - 1, 0));
 
   return (
     <>
