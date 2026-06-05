@@ -297,9 +297,9 @@ export default function Dashboard() {
         <a href="/" className="dash-logo">Nex<span>Reception</span></a>
         <div className="dash-user">
           <span>{user?.emailAddresses[0]?.emailAddress}</span>
-          <SignOutButton>
-            <button className="dash-signout">Sign out</button>
-          </SignOutButton>
+<<SignOutButton redirectUrl="/">
+  <button className="dash-signout">Sign out</button>
+</SignOutButton>
         </div>
       </nav>
 
