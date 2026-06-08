@@ -12,17 +12,8 @@ export async function POST(req: NextRequest) {
       missedCallAction, urgentAction, bookingEnabled, receptionistName, tone, language,
     } = body;
 
-    const systemPrompt = `You are ${receptionistName || "Alex"}, an AI receptionist for ${businessName}, a ${industry} business.
-Your personality is ${tone}. Always be helpful, professional, and represent the business well.
-ABOUT THIS BUSINESS: ${services}
-BUSINESS HOURS: ${hours} (${timezone})
-WHEN A CALLER WANTS A QUOTE OR CALLBACK: ${missedCallAction}
-FOR URGENT OR EMERGENCY CALLS: ${urgentAction}
-${bookingEnabled ? "You can help callers book appointments." : "You cannot book appointments directly. Take a message and let them know someone will follow up."}
-Always greet callers with: "Thank you for calling ${businessName}, this is ${receptionistName || "Alex"}. How can I help you today?"
-Collect caller name and phone number for every call. Never make up information about the business.`;
+    const systemPrompt = `You are ${receptionistName || "Alex"}, an AI receptionist for ${businessName}, a ${industry} business. Your personality is ${tone}. Always be helpful, professional, and represent the business well. ABOUT THIS BUSINESS: ${services}. BUSINESS HOURS: ${hours} (${timezone}). WHEN A CALLER WANTS A QUOTE OR CALLBACK: ${missedCallAction}. FOR URGENT OR EMERGENCY CALLS: ${urgentAction}. Always greet callers with: "Thank you for calling ${businessName}, this is ${receptionistName || "Alex"}. How can I help you today?" Collect caller name and phone number for every call. Never make up information about the business.`;
 
-    // Try Vapi but don't let it block the DB save
     try {
       const vapiResponse = await fetch("https://api.vapi.ai/assistant/" + process.env.VAPI_ASSISTANT_ID, {
         method: "PATCH",
@@ -48,7 +39,6 @@ Collect caller name and phone number for every call. Never make up information a
       console.error("Vapi failed:", vapiErr);
     }
 
-    // Always save to Supabase
     const { error: dbError } = await supabaseAdmin
       .from("clients")
       .insert({
@@ -74,27 +64,18 @@ Collect caller name and phone number for every call. Never make up information a
       return NextResponse.json({ error: "Failed to save client", details: dbError.message }, { status: 500 });
     }
 
-    // Send notification email
     try {
       await resend.emails.send({
         from: "onboarding@resend.dev",
         to: "mitchdiamond11@gmail.com",
         subject: `New NexReception signup: ${businessName}`,
-        html: `
-          <h2>New client signed up!</h2>
-          <p><strong>Business:</strong> ${businessName}</p>
-          <p><strong>Industry:</strong> ${industry}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${phone}</p>
-          <p><strong>Receptionist:</strong> ${receptionistName}</p>
-          <p><strong>Tone:</strong> ${tone}</p>
-        `,
+        html: `<h2>New client signed up!</h2><p><strong>Business:</strong> ${businessName}</p><p><strong>Industry:</strong> ${industry}</p><p><strong>Email:</strong> ${email}</p><p><strong>Phone:</strong> ${phone}</p><p><strong>Receptionist:</strong> ${receptionistName}</p><p><strong>Tone:</strong> ${tone}</p>`,
       });
     } catch (emailErr) {
       console.error("Email error:", emailErr);
     }
 
-    return NextResponse.json({ success: true, message: \`\${businessName}'s receptionist is configured!\` });
+    return NextResponse.json({ success: true, message: "Receptionist configured!" });
 
   } catch (error) {
     console.error("Onboard error:", error);
