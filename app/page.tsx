@@ -827,7 +827,7 @@ export default function Home() {
               <li>Custom greeting &amp; business info</li>
               <li>Collects caller name &amp; number</li>
               <li>1 dedicated business phone number</li>
-              <li>New lead notifications</li>
+              <li>Standard setup &amp; configuration</li>
             </ul>
             <a href="/onboarding" className="btn-plan">Get started</a>
           </div>
@@ -843,7 +843,7 @@ export default function Home() {
               <li>Custom receptionist name &amp; personality</li>
               <li>Answers FAQs about your business</li>
               <li>Urgent call escalation handling</li>
-              <li>Appointment booking scripts</li>
+              <li>One prompt revision per month</li>
               <li>Tone matched to your brand</li>
             </ul>
             <a href="/onboarding" className="btn-plan primary">Get started</a>
@@ -857,9 +857,9 @@ export default function Home() {
             <ul>
               <li>Everything in Professional</li>
               <li>Priority setup &amp; onboarding</li>
-              <li>Monthly prompt tuning</li>
-              <li>Dedicated account review every 30 days</li>
-              <li>Best for high-volume businesses</li>
+              <li>Monthly performance tuning</li>
+              <li>30-day account review call</li>
+              <li>Fastest response time for changes</li>
             </ul>
             <a href="/onboarding" className="btn-plan">Get started</a>
           </div>
