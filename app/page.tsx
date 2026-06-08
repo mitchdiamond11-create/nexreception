@@ -711,7 +711,7 @@ export default function Home() {
           </a>
         </div>
 
-        <p className="hero-note">No contracts · 14-day free trial · Setup in under 30 minutes</p>
+        <p className="hero-note">No contracts · No hidden fees · Setup in under 30 minutes</p>
 
         <div className="call-card">
           <div className="call-avatar">📞</div>
@@ -871,7 +871,7 @@ export default function Home() {
         <div className="cta-inner">
           <div>
             <h2>Ready to stop missing calls?</h2>
-            <p style={{color:'var(--text-mid)', fontSize:'17px', fontWeight:300}}>Set up your AI receptionist in 30 minutes. 14-day free trial, no credit card needed.</p>
+            <p style={{color:'var(--text-mid)', fontSize:'17px', fontWeight:300}}>Set up your AI receptionist in under 30 minutes. Cancel any time.</p>
           </div>
           <a href="/onboarding" className="btn-primary">
             Set up NexReception →
@@ -884,9 +884,6 @@ export default function Home() {
         <a href="#" className="logo" style={{fontSize:'16px'}}>Nex<span>Reception</span></a>
         <p>© 2026 NexReception. All rights reserved.</p>
         <div className="footer-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Contact</a>
         </div>
       </footer>
     </>
