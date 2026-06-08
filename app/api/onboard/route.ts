@@ -65,12 +65,44 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+      // Notify Mitch
       await resend.emails.send({
         from: "onboarding@resend.dev",
         to: "mitchdiamond11@gmail.com",
         subject: `New NexReception signup: ${businessName}`,
         html: `<h2>New client signed up!</h2><p><strong>Business:</strong> ${businessName}</p><p><strong>Industry:</strong> ${industry}</p><p><strong>Email:</strong> ${email}</p><p><strong>Phone:</strong> ${phone}</p><p><strong>Receptionist:</strong> ${receptionistName}</p><p><strong>Tone:</strong> ${tone}</p>`,
       });
+
+      // Welcome email to client
+      if (email && email.includes("@")) {
+        await resend.emails.send({
+          from: "onboarding@resend.dev",
+          to: email,
+          subject: `Welcome to NexReception — Your AI receptionist is being set up`,
+          html: `
+            <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;">
+              <h1 style="color:#00C896;">Welcome to NexReception!</h1>
+              <p>Hi there, thanks for signing up. Your AI receptionist is being configured and will be live within 24 hours.</p>
+              <h2>Your dedicated phone number</h2>
+              <p style="font-size:24px;font-weight:bold;">(631) 502-8210</p>
+              <p>Share this number with your customers. Your AI receptionist will answer every call 24/7.</p>
+              <h2>What your receptionist is set up to do</h2>
+              <ul>
+                <li>Answer calls as <strong>${receptionistName || "Alex"}</strong> for <strong>${businessName}</strong></li>
+                <li>Greet callers and collect their name and phone number</li>
+                <li>Answer questions about your business hours and services</li>
+                <li>Handle urgent calls per your instructions</li>
+              </ul>
+              <h2>How to test it</h2>
+              <p>Call <strong>(631) 502-8210</strong> and your AI receptionist will answer. If anything sounds off, just reply to this email and we'll tune it for you.</p>
+              <h2>Need changes?</h2>
+              <p>Reply to this email anytime and we'll update your receptionist's script, hours, or personality.</p>
+              <br/>
+              <p>— The NexReception Team</p>
+            </div>
+          `,
+        });
+      }
     } catch (emailErr) {
       console.error("Email error:", emailErr);
     }
