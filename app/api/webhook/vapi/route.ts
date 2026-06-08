@@ -22,6 +22,9 @@ export async function POST(req: NextRequest) {
       message.analysis?.structuredData ||
       {};
 
+    // DEBUG: log the raw structured data shape
+    console.log("RAW analysis:", JSON.stringify(message.analysis, null, 2));
+
     // structuredOutputs can be keyed by output id; flatten to find lead_info
     let lead: any = {};
     if (structured.lead_info) {
