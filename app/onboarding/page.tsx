@@ -32,6 +32,10 @@ export default function Onboarding() {
     tone: "friendly",
     language: "English",
     plan: "professional",
+    brokerageName: "",
+    areasServed: "",
+    zapierWebhook: "",
+    leadQualification: "Ask if they are buying or selling, their timeline, budget range, and what areas they are interested in.",
   });
 
   const update = (field: string, value: string | boolean) =>
@@ -555,6 +559,31 @@ export default function Onboarding() {
                   <option>Hawaii Time (HT)</option>
                 </select>
               </div>
+
+              {form.industry === "Real Estate" && (
+                <>
+                  <div className="ob-field">
+                    <label className="ob-label">Brokerage name</label>
+                    <input className="ob-input" placeholder="e.g. Coldwell Banker, Keller Williams..." value={form.brokerageName} onChange={e => update("brokerageName", e.target.value)} />
+                  </div>
+
+                  <div className="ob-field">
+                    <label className="ob-label">Areas / neighborhoods you serve</label>
+                    <textarea className="ob-input" style={{minHeight:"80px"}} placeholder="e.g. Huntington, Melville, Cold Spring Harbor, all of Suffolk County..." value={form.areasServed} onChange={e => update("areasServed", e.target.value)} />
+                  </div>
+
+                  <div className="ob-field">
+                    <label className="ob-label">Lead qualification questions</label>
+                    <textarea className="ob-input" style={{minHeight:"100px"}} placeholder="e.g. Ask if they are buying or selling, their timeline, budget range, and what areas they are interested in." value={form.leadQualification} onChange={e => update("leadQualification", e.target.value)} />
+                  </div>
+
+                  <div className="ob-field">
+                    <label className="ob-label">Zapier webhook URL <span style={{color:"var(--text-muted)",fontWeight:300,textTransform:"none",letterSpacing:0}}>(for CRM integration)</span></label>
+                    <input className="ob-input" placeholder="https://hooks.zapier.com/hooks/catch/..." value={form.zapierWebhook} onChange={e => update("zapierWebhook", e.target.value)} />
+                    <div style={{fontSize:"12px",color:"var(--text-muted)",marginTop:"6px"}}>After each call, lead data will be sent here automatically. <a href="https://zapier.com" target="_blank" style={{color:"var(--accent)"}}>Learn more →</a></div>
+                  </div>
+                </>
+              )}
 
               <div className="ob-actions">
                 <button className="ob-btn-back" onClick={back}>← Back</button>

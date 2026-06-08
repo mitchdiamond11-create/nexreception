@@ -10,9 +10,14 @@ export async function POST(req: NextRequest) {
     const {
       businessName, industry, phone, email, services, hours, timezone,
       missedCallAction, urgentAction, bookingEnabled, receptionistName, tone, language,
+      brokerageName, areasServed, zapierWebhook, leadQualification,
     } = body;
 
-    const systemPrompt = `You are ${receptionistName || "Alex"}, an AI receptionist for ${businessName}, a ${industry} business. Your personality is ${tone}. Always be helpful, professional, and represent the business well. ABOUT THIS BUSINESS: ${services}. BUSINESS HOURS: ${hours} (${timezone}). WHEN A CALLER WANTS A QUOTE OR CALLBACK: ${missedCallAction}. FOR URGENT OR EMERGENCY CALLS: ${urgentAction}. Always greet callers with: "Thank you for calling ${businessName}, this is ${receptionistName || "Alex"}. How can I help you today?" Collect caller name and phone number for every call. Never make up information about the business.`;
+    const isRealEstate = industry === "Real Estate";
+    const realEstatePart = isRealEstate
+      ? ` BROKERAGE: ${brokerageName || businessName}. AREAS SERVED: ${areasServed}. LEAD QUALIFICATION: ${leadQualification}.`
+      : "";
+    const systemPrompt = `You are ${receptionistName || "Alex"}, an AI receptionist for ${businessName}, a ${industry} business. Your personality is ${tone}. Always be helpful, professional, and represent the business well. ABOUT THIS BUSINESS: ${services}.${realEstatePart} BUSINESS HOURS: ${hours} (${timezone}). WHEN A CALLER WANTS A QUOTE OR CALLBACK: ${missedCallAction}. FOR URGENT OR EMERGENCY CALLS: ${urgentAction}. Always greet callers with: "Thank you for calling ${businessName}, this is ${receptionistName || "Alex"}. How can I help you today?" Collect caller name and phone number for every call. Never make up information about the business.`;
 
     try {
       const vapiResponse = await fetch("https://api.vapi.ai/assistant/" + process.env.VAPI_ASSISTANT_ID, {
@@ -55,6 +60,10 @@ export async function POST(req: NextRequest) {
         receptionist_name: receptionistName,
         tone,
         language,
+        brokerage_name: brokerageName || null,
+        areas_served: areasServed || null,
+        zapier_webhook: zapierWebhook || null,
+        lead_qualification: leadQualification || null,
         status: "active",
         created_at: new Date().toISOString(),
       });
