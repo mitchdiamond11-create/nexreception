@@ -1,7 +1,6 @@
 "use client";
-import { useState } from "react";
-
-const STEPS = ["Business", "Services", "Calls", "Personality", "Done"];
+import React, { useState } from "react";
+const STEPS = ["Business", "Services", "Calls", "Personality", "Plan", "Done"];
 
 const industries = [
   "HVAC & Heating","Plumbing","Electrical","Roofing","Law Firm",
@@ -32,26 +31,47 @@ export default function Onboarding() {
     receptionistName: "",
     tone: "friendly",
     language: "English",
+    plan: "professional",
   });
 
   const update = (field: string, value: string | boolean) =>
     setForm((f) => ({ ...f, [field]: value }));
 
-const next = async () => {
-  if (step === 3) {
-    try {
-      await fetch("/api/onboard", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-    } catch (e) {
-      console.error(e);
+  const next = async () => {
+    if (step === 3) {
+      try {
+        const res = await fetch("/api/onboard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+        const data = await res.json();
+        console.log("API response:", res.status, data);
+      } catch (e) {
+        console.error("Fetch error:", e);
+      }
     }
-  }
-  setStep((s) => Math.min(s + 1, STEPS.length - 1));
-};  const back = () => setStep((s) => Math.max(s - 1, 0));
-
+    if (step === 4) {
+      try {
+        const res = await fetch("/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: form.plan, email: form.email, businessName: form.businessName }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+      } catch (e) {
+        console.error("Checkout error:", e);
+        alert("Checkout error: " + e);
+      }
+      return;
+    }
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  };
+  const back = () => setStep((s) => Math.max(s - 1, 0));
   return (
     <>
       <style>{`
@@ -458,16 +478,16 @@ const next = async () => {
         <div className="ob-card">
           {/* Progress */}
           <div className="ob-steps">
-            {STEPS.slice(0, -1).map((s, i) => (
-              <>
-                <div key={s} className={`ob-step-dot ${i === step ? "active" : i < step ? "done" : ""}`}>
-                  {i < step ? "✓" : i + 1}
-                </div>
-                {i < STEPS.length - 2 && (
-                  <div key={`line-${i}`} className={`ob-step-line ${i < step ? "done" : ""}`} />
-                )}
-              </>
-            ))}
+          {STEPS.slice(0, -1).map((s, i) => (
+            <React.Fragment key={s}>
+              <div className={`ob-step-dot ${i === step ? "active" : i < step ? "done" : ""}`}>
+                {i < step ? "✓" : i + 1}
+              </div>
+              {i < STEPS.length - 2 && (
+                <div className={`ob-step-line ${i < step ? "done" : ""}`} />
+              )}
+            </React.Fragment>
+          ))}
           </div>
 
           {/* STEP 0 — Business */}
@@ -495,8 +515,7 @@ const next = async () => {
                 <label className="ob-label">Industry</label>
                 <div className="ob-industry-grid">
                   {industries.map(ind => (
-                    <button key={ind} className={`ob-industry-btn ${form.industry === ind ? "selected" : ""}`} onClick={() => update("industry", ind)}>
-                      {ind}
+<button type="button" key={ind} className={`ob-industry-btn ${form.industry === ind ? "selected" : ""}`} onClick={() => update("industry", ind)}>                      {ind}
                     </button>
                   ))}
                 </div>
@@ -593,8 +612,7 @@ const next = async () => {
                 <label className="ob-label">Tone</label>
                 <div className="ob-tone-grid">
                   {tones.map(t => (
-                    <button key={t.id} className={`ob-tone-btn ${form.tone === t.id ? "selected" : ""}`} onClick={() => update("tone", t.id)}>
-                      <div className="ob-tone-label">{t.label}</div>
+<button type="button" key={t.id} className={`ob-industry-btn ${form.tone === t.id ? "selected" : ""}`} onClick={() => update("tone", t.id)}>                      <div className="ob-tone-label">{t.label}</div>
                       <div className="ob-tone-desc">{t.desc}</div>
                     </button>
                   ))}
@@ -619,8 +637,40 @@ const next = async () => {
             </>
           )}
 
-          {/* STEP 4 — Done */}
+          {/* STEP 4 — Plan */}
           {step === 4 && (
+            <>
+              <div className="ob-step-title">Choose your plan</div>
+              <div className="ob-step-sub">You can upgrade or downgrade anytime.</div>
+              <div style={{display:"flex",flexDirection:"column",gap:"12px",margin:"24px 0"}}>
+                {[
+                  {id:"starter",name:"Starter",price:"$197",desc:"Up to 200 calls/month · 24/7 answering · Lead capture"},
+                  {id:"professional",name:"Professional",price:"$297",desc:"Up to 600 calls/month · Appointment booking · CRM integration",popular:true},
+                  {id:"business",name:"Business",price:"$447",desc:"Unlimited calls · Full dashboard · Priority support"},
+                ].map(p => (
+                  <div key={p.id} onClick={() => update("plan", p.id)} style={{
+                    border: form.plan === p.id ? "2px solid #00C896" : "2px solid rgba(255,255,255,0.07)",
+                    borderRadius:"12px", padding:"20px 24px", cursor:"pointer",
+                    background: form.plan === p.id ? "rgba(0,200,150,0.08)" : "rgba(255,255,255,0.02)",
+                    position:"relative"
+                  }}>
+                    {p.popular && <span style={{position:"absolute",top:"12px",right:"12px",background:"#00C896",color:"#000",fontSize:"11px",fontWeight:600,padding:"2px 8px",borderRadius:"100px"}}>MOST POPULAR</span>}
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}}>
+                      <span style={{fontFamily:"Syne,sans-serif",fontWeight:700,fontSize:"16px"}}>{p.name}</span>
+                      <span style={{fontFamily:"Syne,sans-serif",fontWeight:800,fontSize:"20px",color:"#00C896"}}>{p.price}<span style={{fontSize:"13px",fontWeight:400,color:"#6B7A8D"}}>/mo</span></span>
+                    </div>
+                    <div style={{fontSize:"13px",color:"#6B7A8D"}}>{p.desc}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="ob-actions">
+                <button className="ob-btn-back" onClick={back}>← Back</button>
+                <button className="ob-btn-next" onClick={next}>Proceed to payment →</button>
+              </div>
+            </>
+          )}
+          {/* STEP 5 — Done */}
+          {step === 5 && (
             <div className="ob-done">
               <div className="ob-done-icon">🎉</div>
               <h2>You&apos;re all set!</h2>

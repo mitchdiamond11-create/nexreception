@@ -1,88 +1,77 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-
     const {
-      businessName,
-      industry,
-      phone,
-      email,
-      services,
-      hours,
-      timezone,
-      missedCallAction,
-      urgentAction,
-      bookingEnabled,
-      receptionistName,
-      tone,
-      language,
+      businessName, industry, phone, email, services, hours, timezone,
+      missedCallAction, urgentAction, bookingEnabled, receptionistName, tone, language,
     } = body;
 
     const systemPrompt = `You are ${receptionistName || "Alex"}, an AI receptionist for ${businessName}, a ${industry} business.
-
 Your personality is ${tone}. Always be helpful, professional, and represent the business well.
+ABOUT THIS BUSINESS: ${services}
+BUSINESS HOURS: ${hours} (${timezone})
+WHEN A CALLER WANTS A QUOTE OR CALLBACK: ${missedCallAction}
+FOR URGENT OR EMERGENCY CALLS: ${urgentAction}
+${bookingEnabled ? "You can help callers book appointments." : "You cannot book appointments directly. Take a message and let them know someone will follow up."}
+Always greet callers with: "Thank you for calling ${businessName}, this is ${receptionistName || "Alex"}. How can I help you today?"
+Collect caller name and phone number for every call. Never make up information about the business.`;
 
-ABOUT THIS BUSINESS:
-${services}
-
-BUSINESS HOURS:
-${hours} (${timezone})
-
-WHEN A CALLER WANTS A QUOTE OR CALLBACK:
-${missedCallAction}
-
-FOR URGENT OR EMERGENCY CALLS:
-${urgentAction}
-
-${bookingEnabled ? "You can help callers book appointments. Ask for their preferred date and time." : "You cannot book appointments directly. Take a message and let them know someone will follow up."}
-
-IMPORTANT RULES:
-- Always greet callers warmly with "Thank you for calling ${businessName}, this is ${receptionistName || "Alex"}. How can I help you today?"
-- Collect caller name and phone number for every call
-- Be concise — callers are busy
-- If you don't know something, say you'll have someone follow up
-- Never make up information about the business
-- Always end calls by confirming next steps`;
-
-    const vapiResponse = await fetch("https://api.vapi.ai/assistant", {
-      method: "PATCH",
-      headers: {
-        "Authorization": `Bearer ${process.env.VAPI_PRIVATE_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id: process.env.VAPI_ASSISTANT_ID,
-        model: {
-          provider: "anthropic",
-          model: "claude-haiku-4-5",
-          messages: [
-            {
-              role: "system",
-              content: systemPrompt,
-            },
-          ],
+    // Try Vapi but don't let it block the DB save
+    try {
+      const vapiResponse = await fetch("https://api.vapi.ai/assistant/" + process.env.VAPI_ASSISTANT_ID, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${process.env.VAPI_PRIVATE_KEY}`,
+          "Content-Type": "application/json",
         },
-        name: `${businessName} Receptionist`,
-        firstMessage: `Thank you for calling ${businessName}, this is ${receptionistName || "Alex"}. How can I help you today?`,
-        language: language || "en",
-      }),
-    });
-
-    if (!vapiResponse.ok) {
-      const error = await vapiResponse.text();
-      console.error("Vapi error:", error);
-      return NextResponse.json({ error: "Failed to configure agent" }, { status: 500 });
+        body: JSON.stringify({
+          model: {
+            provider: "anthropic",
+            model: "claude-haiku-4-5",
+            messages: [{ role: "system", content: systemPrompt }],
+          },
+          name: `${businessName} Receptionist`,
+          firstMessage: `Thank you for calling ${businessName}, this is ${receptionistName || "Alex"}. How can I help you today?`,
+        }),
+      });
+      if (!vapiResponse.ok) {
+        const err = await vapiResponse.text();
+        console.error("Vapi error:", err);
+      }
+    } catch (vapiErr) {
+      console.error("Vapi failed:", vapiErr);
     }
 
-    const agent = await vapiResponse.json();
+    // Always save to Supabase
+    const { error: dbError } = await supabaseAdmin
+      .from("clients")
+      .insert({
+        business_name: businessName,
+        industry,
+        phone,
+        email,
+        services,
+        hours,
+        timezone,
+        missed_call_action: missedCallAction,
+        urgent_action: urgentAction,
+        booking_enabled: bookingEnabled,
+        receptionist_name: receptionistName,
+        tone,
+        language,
+        status: "active",
+        created_at: new Date().toISOString(),
+      });
 
-    return NextResponse.json({
-      success: true,
-      agentId: agent.id,
-      message: `${businessName}'s receptionist is configured!`,
-    });
+    if (dbError) {
+      console.error("Database error:", dbError);
+      return NextResponse.json({ error: "Failed to save client", details: dbError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, message: `${businessName}'s receptionist is configured!` });
 
   } catch (error) {
     console.error("Onboard error:", error);
