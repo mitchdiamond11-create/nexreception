@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: "http://localhost:3000/onboarding?success=true",
-      cancel_url: "http://localhost:3000/onboarding",
+      success_url: "https://nexreception.vercel.app/onboarding?success=true",
+      cancel_url: "https://nexreception.vercel.app/onboarding",
       metadata: { businessName, plan },
     });
 
