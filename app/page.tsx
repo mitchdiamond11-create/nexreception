@@ -819,15 +819,15 @@ export default function Home() {
         <div className="pricing-grid">
           <div className="plan">
             <div className="plan-name">Starter</div>
-            <div className="plan-price"><span>$</span>97</div>
+            <div className="plan-price"><span>$</span>197</div>
             <div className="plan-period">per month</div>
             <div className="plan-divider" />
             <ul>
-              <li>Up to 200 calls/month</li>
-              <li>24/7 call answering</li>
-              <li>Lead capture & email alerts</li>
-              <li>1 business number</li>
-              <li>Basic call summaries</li>
+              <li>AI answers every call 24/7</li>
+              <li>Custom greeting &amp; business info</li>
+              <li>Collects caller name &amp; number</li>
+              <li>1 dedicated business phone number</li>
+              <li>New lead notifications</li>
             </ul>
             <a href="/onboarding" className="btn-plan">Get started</a>
           </div>
@@ -835,32 +835,31 @@ export default function Home() {
           <div className="plan featured">
             <div className="plan-badge">Most popular</div>
             <div className="plan-name">Professional</div>
-            <div className="plan-price"><span>$</span>197</div>
+            <div className="plan-price"><span>$</span>297</div>
             <div className="plan-period">per month</div>
             <div className="plan-divider" />
             <ul>
-              <li>Up to 600 calls/month</li>
-              <li>24/7 call answering</li>
-              <li>Appointment booking</li>
-              <li>CRM / Airtable integration</li>
-              <li>Smart escalation alerts</li>
-              <li>Full call dashboard</li>
+              <li>Everything in Starter</li>
+              <li>Custom receptionist name &amp; personality</li>
+              <li>Answers FAQs about your business</li>
+              <li>Urgent call escalation handling</li>
+              <li>Appointment booking scripts</li>
+              <li>Tone matched to your brand</li>
             </ul>
             <a href="/onboarding" className="btn-plan primary">Get started</a>
           </div>
 
           <div className="plan">
             <div className="plan-name">Business</div>
-            <div className="plan-price"><span>$</span>347</div>
+            <div className="plan-price"><span>$</span>447</div>
             <div className="plan-period">per month</div>
             <div className="plan-divider" />
             <ul>
-              <li>Unlimited calls</li>
-              <li>Multiple locations / numbers</li>
-              <li>Custom voice & personality</li>
-              <li>Priority escalation</li>
-              <li>Dedicated onboarding support</li>
-              <li>White-glove setup</li>
+              <li>Everything in Professional</li>
+              <li>Priority setup &amp; onboarding</li>
+              <li>Monthly prompt tuning</li>
+              <li>Dedicated account review every 30 days</li>
+              <li>Best for high-volume businesses</li>
             </ul>
             <a href="/onboarding" className="btn-plan">Get started</a>
           </div>
