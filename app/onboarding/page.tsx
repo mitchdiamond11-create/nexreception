@@ -644,9 +644,9 @@ export default function Onboarding() {
               <div className="ob-step-sub">You can upgrade or downgrade anytime.</div>
               <div style={{display:"flex",flexDirection:"column",gap:"12px",margin:"24px 0"}}>
                 {[
-                  {id:"starter",name:"Starter",price:"$197",desc:"Up to 200 calls/month · 24/7 answering · Lead capture"},
-                  {id:"professional",name:"Professional",price:"$297",desc:"Up to 600 calls/month · Appointment booking · CRM integration",popular:true},
-                  {id:"business",name:"Business",price:"$447",desc:"Unlimited calls · Full dashboard · Priority support"},
+                  {id:"starter",name:"Starter",price:"$197",desc:"AI answers every call 24/7 · Custom greeting · Standard setup"},
+                  {id:"professional",name:"Professional",price:"$297",desc:"Custom personality · FAQ handling · One prompt revision/month",popular:true},
+                  {id:"business",name:"Business",price:"$447",desc:"Priority setup · Monthly tuning · 30-day account review call"},
                 ].map(p => (
                   <div key={p.id} onClick={() => update("plan", p.id)} style={{
                     border: form.plan === p.id ? "2px solid #00C896" : "2px solid rgba(255,255,255,0.07)",
