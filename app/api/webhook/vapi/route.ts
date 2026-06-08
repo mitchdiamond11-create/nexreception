@@ -6,7 +6,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { message } = body;
 
-    // Only process end-of-call reports
     if (message?.type !== "end-of-call-report") {
       return NextResponse.json({ received: true });
     }
@@ -17,35 +16,63 @@ export async function POST(req: NextRequest) {
     const callerPhone = call?.customer?.number || "";
     const assistantId = call?.assistantId || "";
 
-    // Extract caller name from transcript (basic)
-    const nameMatch = transcript.match(/(?:my name is|i'm|i am)\s+([A-Z][a-z]+)/i);
-    const callerName = nameMatch ? nameMatch[1] : "Unknown";
+    // Pull structured data extracted by Vapi
+    const structured =
+      message.analysis?.structuredOutputs ||
+      message.analysis?.structuredData ||
+      {};
+
+    // structuredOutputs can be keyed by output id; flatten to find lead_info
+    let lead: any = {};
+    if (structured.lead_info) {
+      lead = structured.lead_info;
+    } else {
+      // search nested objects for our fields
+      for (const key of Object.keys(structured)) {
+        const val = structured[key];
+        if (val && typeof val === "object" && (val.caller_name || val.callback_number)) {
+          lead = val;
+          break;
+        }
+      }
+    }
+
+    const callerName = lead.caller_name || "Unknown";
+    const callbackNumber = lead.callback_number || callerPhone;
 
     // Save call log to Supabase
     await supabaseAdmin.from("call_logs").insert({
       assistant_id: assistantId,
       caller_phone: callerPhone,
       caller_name: callerName,
+      callback_number: callbackNumber,
+      buy_or_sell: lead.buy_or_sell || null,
+      budget: lead.budget || null,
+      areas: lead.areas || null,
+      timeline: lead.timeline || null,
       transcript,
       summary,
       created_at: new Date().toISOString(),
     });
 
-    // Find the client by assistant and get their Zapier webhook
+    // Find client by assistant and get their Zapier webhook
     const { data: client } = await supabaseAdmin
       .from("clients")
       .select("zapier_webhook, business_name, industry")
       .eq("vapi_assistant_id", assistantId)
       .single();
 
-    // Fire Zapier webhook if configured
     if (client?.zapier_webhook) {
       await fetch(client.zapier_webhook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           caller_name: callerName,
-          caller_phone: callerPhone,
+          callback_number: callbackNumber,
+          buy_or_sell: lead.buy_or_sell || "",
+          budget: lead.budget || "",
+          areas: lead.areas || "",
+          timeline: lead.timeline || "",
           summary,
           transcript,
           business_name: client.business_name,
