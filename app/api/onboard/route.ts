@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
@@ -71,7 +74,27 @@ Collect caller name and phone number for every call. Never make up information a
       return NextResponse.json({ error: "Failed to save client", details: dbError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: `${businessName}'s receptionist is configured!` });
+    // Send notification email
+    try {
+      await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: "mitchdiamond11@gmail.com",
+        subject: `New NexReception signup: ${businessName}`,
+        html: `
+          <h2>New client signed up!</h2>
+          <p><strong>Business:</strong> ${businessName}</p>
+          <p><strong>Industry:</strong> ${industry}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone:</strong> ${phone}</p>
+          <p><strong>Receptionist:</strong> ${receptionistName}</p>
+          <p><strong>Tone:</strong> ${tone}</p>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Email error:", emailErr);
+    }
+
+    return NextResponse.json({ success: true, message: \`\${businessName}'s receptionist is configured!\` });
 
   } catch (error) {
     console.error("Onboard error:", error);
