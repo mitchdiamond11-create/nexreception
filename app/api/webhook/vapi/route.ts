@@ -6,6 +6,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { message } = body;
 
+    console.log("EVENT TYPE:", message?.type);
+
     if (message?.type !== "end-of-call-report") {
       return NextResponse.json({ received: true });
     }
@@ -16,38 +18,34 @@ export async function POST(req: NextRequest) {
     const callerPhone = call?.customer?.number || "";
     const assistantId = call?.assistantId || "";
 
-    // Pull structured data extracted by Vapi
-    const structured =
-      message.analysis?.structuredOutputs ||
+    const artifact = message.artifact || {};
+    const structuredData =
+      artifact.structuredOutputs ||
+      artifact.structuredData ||
       message.analysis?.structuredData ||
+      message.analysis?.structuredOutputs ||
       {};
 
-    // DEBUG: log keys to find where structured outputs live
-    console.log("MESSAGE KEYS:", Object.keys(message));
-    console.log("ANALYSIS:", JSON.stringify(message.analysis));
-    console.log("STRUCTURED OUTPUTS:", JSON.stringify(message.analysis?.structuredOutputs));
-    console.log("CALL ANALYSIS:", JSON.stringify(message.call?.analysis));
-    console.log("ARTIFACT:", JSON.stringify(message.artifact ? Object.keys(message.artifact) : null));
+    console.log("STRUCTURED DATA FOUND:", JSON.stringify(structuredData));
 
-    // structuredOutputs can be keyed by output id; flatten to find lead_info
     let lead: any = {};
-    if (structured.lead_info) {
-      lead = structured.lead_info;
-    } else {
-      // search nested objects for our fields
-      for (const key of Object.keys(structured)) {
-        const val = structured[key];
-        if (val && typeof val === "object" && (val.caller_name || val.callback_number)) {
-          lead = val;
+    for (const key of Object.keys(structuredData)) {
+      const entry = structuredData[key];
+      if (entry && typeof entry === "object") {
+        const fields = entry.result || entry.value || entry;
+        if (fields.caller_name || fields.callback_number || fields.budget) {
+          lead = fields;
           break;
         }
       }
+    }
+    if (!lead.caller_name && (structuredData.caller_name || structuredData.budget)) {
+      lead = structuredData;
     }
 
     const callerName = lead.caller_name || "Unknown";
     const callbackNumber = lead.callback_number || callerPhone;
 
-    // Save call log to Supabase
     await supabaseAdmin.from("call_logs").insert({
       assistant_id: assistantId,
       caller_phone: callerPhone,
@@ -62,7 +60,6 @@ export async function POST(req: NextRequest) {
       created_at: new Date().toISOString(),
     });
 
-    // Find client by assistant and get their Zapier webhook
     const { data: client } = await supabaseAdmin
       .from("clients")
       .select("zapier_webhook, business_name, industry")
