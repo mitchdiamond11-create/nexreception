@@ -6,8 +6,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { message } = body;
 
-    console.log("EVENT TYPE:", message?.type);
-
     if (message?.type !== "end-of-call-report") {
       return NextResponse.json({ received: true });
     }
@@ -25,8 +23,6 @@ export async function POST(req: NextRequest) {
       message.analysis?.structuredData ||
       message.analysis?.structuredOutputs ||
       {};
-
-    console.log("STRUCTURED DATA FOUND:", JSON.stringify(structuredData));
 
     let lead: any = {};
     for (const key of Object.keys(structuredData)) {
