@@ -1,3 +1,4 @@
+import Navbar from "@/app/components/Navbar";
 export default function Home() {
   return (
     <>
@@ -676,15 +677,15 @@ export default function Home() {
       `}</style>
 
       {/* NAV */}
-      <nav>
-        <a href="#" className="logo">Nex<span>Reception</span></a>
-        <ul className="nav-links">
-          <li><a href="#how">How it works</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#pricing">Pricing</a></li>
-          <li><a href="/onboarding" className="nav-cta">Get started</a></li>
-        </ul>
-      </nav>
+      <Navbar />
+
+
+
+
+
+
+
+
 
       {/* HERO */}
       <div className="hero">
@@ -828,7 +829,7 @@ export default function Home() {
               <li>Collects caller name &amp; number</li>
               <li>1 dedicated business phone number</li>
               <li>Standard setup &amp; configuration</li>
-            </ul>
+            </ul>    
             <a href="/onboarding" className="btn-plan">Get started</a>
           </div>
 
@@ -845,6 +846,7 @@ export default function Home() {
               <li>Urgent call escalation handling</li>
               <li>One prompt revision per month</li>
               <li>Tone matched to your brand</li>
+    
             </ul>
             <a href="/onboarding" className="btn-plan primary">Get started</a>
           </div>
@@ -860,6 +862,7 @@ export default function Home() {
               <li>Monthly performance tuning</li>
               <li>30-day account review call</li>
               <li>Fastest response time for changes</li>
+    
             </ul>
             <a href="/onboarding" className="btn-plan">Get started</a>
           </div>
