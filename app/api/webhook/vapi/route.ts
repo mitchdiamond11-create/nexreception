@@ -27,15 +27,17 @@ export async function POST(req: NextRequest) {
     let lead: any = {};
     for (const key of Object.keys(structuredData)) {
       const entry = structuredData[key];
-      if (entry && typeof entry === "object") {
+      if (entry && typeof entry === "object" && entry.name && entry.result !== undefined) {
+        const fieldName = entry.name.toLowerCase();
+        lead[fieldName] = entry.result;
+      } else if (entry && typeof entry === "object") {
         const fields = entry.result || entry.value || entry;
-        if (fields.caller_name || fields.callback_number || fields.budget) {
-          lead = fields;
-          break;
+        if (fields && typeof fields === "object" && (fields.caller_name || fields.callback_number || fields.budget)) {
+          lead = { ...lead, ...fields };
         }
       }
     }
-    if (!lead.caller_name && (structuredData.caller_name || structuredData.budget)) {
+    if (!lead.caller_name && structuredData.caller_name) {
       lead = structuredData;
     }
 
