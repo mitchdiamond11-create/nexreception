@@ -28,7 +28,9 @@ export async function POST(req: NextRequest) {
     for (const key of Object.keys(structuredData)) {
       const entry = structuredData[key];
       if (entry && typeof entry === "object" && typeof entry.name === "string" && entry.result !== undefined) {
-        lead[entry.name.toLowerCase()] = entry.result;
+        if (typeof entry.result !== "boolean") {
+          lead[entry.name.toLowerCase()] = entry.result;
+        }
       }
     }
 
