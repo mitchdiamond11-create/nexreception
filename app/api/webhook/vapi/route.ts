@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     const call = message.call;
     const transcript = message.transcript || "";
-    const summary = message.summary || lead.summary || "";
+    // summary set after lead parsing below
     const callerPhone = call?.customer?.number || "";
     const assistantId = call?.assistantId || "";
 
@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const summary = message.summary || lead.summary || "";
     const callerName = lead.caller_name || "Unknown";
     const callbackNumber = lead.callback_number || callerPhone;
 
