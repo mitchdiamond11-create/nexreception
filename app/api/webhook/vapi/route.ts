@@ -27,18 +27,9 @@ export async function POST(req: NextRequest) {
     let lead: any = {};
     for (const key of Object.keys(structuredData)) {
       const entry = structuredData[key];
-      if (entry && typeof entry === "object" && entry.name && entry.result !== undefined) {
-        const fieldName = entry.name.toLowerCase();
-        lead[fieldName] = entry.result;
-      } else if (entry && typeof entry === "object") {
-        const fields = entry.result || entry.value || entry;
-        if (fields && typeof fields === "object" && (fields.caller_name || fields.callback_number || fields.budget)) {
-          lead = { ...lead, ...fields };
-        }
+      if (entry && typeof entry === "object" && typeof entry.name === "string" && entry.result !== undefined) {
+        lead[entry.name.toLowerCase()] = entry.result;
       }
-    }
-    if (!lead.caller_name && structuredData.caller_name) {
-      lead = structuredData;
     }
 
     const callerName = lead.caller_name || "Unknown";
