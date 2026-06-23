@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     const call = message.call;
     const transcript = message.transcript || "";
-    const summary = message.summary || "";
+    const summary = message.summary || lead.summary || "";
     const callerPhone = call?.customer?.number || "";
     const assistantId = call?.assistantId || "";
 
